@@ -1,9 +1,11 @@
-const express = require('express');
-const app = express();
+import express from 'express';
+import userRoutes from './routes/userRoutes';
 
-// app.use(express.json());
-// app.use('/api');
+const app = express();
+app.use(express.json());
+
+app.use('/api/users', userRoutes);
 
 app.listen(3000, () => {
-  console.log('Servidor iniciado na porta 3000');
+    console.log('Server running on http://localhost:3000');
 });
