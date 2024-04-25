@@ -47,3 +47,37 @@ export async function answerQuestion(req: any, res: any) {
         }
     }
 }
+
+export async function getAnswersForQuestion(req: any, res: any) {
+    const { questionId } = req.params;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+  
+    if (req.user?.type !== 'ORGANIZADOR') {
+      return res.status(403).json({ message: "Access denied. Only organizers can view answers." });
+    }
+  
+    try {
+      const answers = await prisma.answer.findMany({
+        where: {
+          questionId: questionId,
+        },
+        skip,
+        take: limit,
+      });
+  
+      res.status(200).json({
+        data: answers,
+        currentPage: page,
+        perPage: limit,
+      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(500).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "An unexpected error occurred" });
+      }
+    }
+  }
+  
