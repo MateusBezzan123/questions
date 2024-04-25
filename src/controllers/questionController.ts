@@ -6,8 +6,9 @@ export async function createQuestion(req: any, res: any) {
     if (!req.user || req.user.type !== 'ORGANIZADOR') {
         return res.status(403).json({ message: "Access denied. Only organizers can create questions." });
     }
-
+    
     const { content } = req.body;
+
     try {
         const question = await prisma.question.create({
             data: {

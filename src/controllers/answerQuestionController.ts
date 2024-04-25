@@ -4,7 +4,12 @@ const prisma = new PrismaClient();
 
 export async function answerQuestion(req: any, res: any) {
     const { questionId, content } = req.body as { questionId: string, content: string };
-    const userId = req.user!.userId;
+
+    if (!req.user) {
+        return res.status(401).json({ message: "You must be logged in to answer a question." });
+    }
+
+    const userId = req.user.userId;
 
     try {
         const question = await prisma.question.findUnique({
