@@ -2,11 +2,13 @@ import { PrismaClient, UserType } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-
-dotenv.config()
+dotenv.config();
 
 const prisma = new PrismaClient();
-const secretKey = process.env.JWT_SECRET || ''
+const secretKey = process.env.JWT_SECRET || 'asfdasd'
+if (!secretKey) {
+    throw new Error('JWT_SECRET is not set');
+}
 
 export async function registerUser(username: string, password: string, type: string) {
     const salt = await bcrypt.genSalt(10);
