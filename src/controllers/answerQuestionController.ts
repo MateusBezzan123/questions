@@ -2,17 +2,28 @@ import { answerService } from '../services/answerService';
 
 class AnswerController {
     async answerQuestion(req: any, res: any) {
-        if (!req.user) {
-            return res.status(401).json({ message: "You must be logged in to answer a question." });
+        const { user, body: { questionId, content } } = req;
+
+        if (!user) {
+            return res.status(401).json({ message: "Unauthorized: User must be logged in." });
+        }
+        if (!questionId || !content) {
+            return res.status(400).json({ message: "Missing questionId or content" });
         }
 
-        const { questionId, content } = req.body;
-
         try {
-            const answer = await answerService.addAnswer(questionId, req.user.userId, content);
-            res.status(201).json(answer);
-        } catch (error: any) {
-            res.status(500).json({ message: error.message });
+            const answer = await answerService.addAnswer(questionId, user.userId, content);
+            return res.status(201).json(answer);
+        } catch (error) {
+            if (error.message.includes('Duplicate answer')) {
+                return res.status(409).json({ message: "Duplicate answer not allowed" });
+            } else if (error.message.includes('Invalid userId')) {
+                return res.status(400).json({ message: "Invalid userId format" });
+            } else if (error.message.includes('Question is closed')) {
+                return res.status(403).json({ message: "Cannot answer a closed question" });
+            } else {
+                return res.status(500).json({ message: error.message || "Internal server error" });
+            }
         }
     }
 
